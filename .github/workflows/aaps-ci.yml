@@ -253,4 +253,3 @@ jobs:
       workflow_name: 'AAPS CI'
       keep_runs: 20
       keep_threshold: 5
-      keep_threshold: 5
