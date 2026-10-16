@@ -148,6 +148,10 @@ jobs:
               -Pandroid.injected.signing.store.password="${{ secrets.KEYSTORE_PASSWORD }}" \
               -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
               -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}" \
+              -PreleaseStoreFile="$RUNNER_TEMP/keystore/keystore.jks" \
+              -PreleaseStorePassword="${{ secrets.KEYSTORE_PASSWORD }}" \
+              -PreleaseKeyAlias="${{ secrets.KEY_ALIAS }}" \
+              -PreleaseKeyPassword="${{ secrets.KEY_PASSWORD }}" \
               -PignoreUncommittedChanges=true
 
       - name: Rename APKs with version
