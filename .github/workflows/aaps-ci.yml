@@ -57,89 +57,6 @@ jobs:
     name: Build AAPS
     runs-on: ubuntu-latest
     steps:
-      - name: Decode Secrets Keystore Set to Env
-        run: |
-          if [ -n "${{ secrets.KEYSTORE_SET }}" ]; then
-            echo "🔐 Decoding KEYSTORE_SET..."
-            DECODED=$(echo "${{ secrets.KEYSTORE_SET }}" | base64 -d)
-
-            KEYSTORE_BASE64=$(echo "$DECODED" | cut -d'|' -f1)
-            KEYSTORE_PASSWORD=$(echo "$DECODED" | cut -d'|' -f2)
-            KEY_ALIAS=$(echo "$DECODED" | cut -d'|' -f3)
-            KEY_PASSWORD=$(echo "$DECODED" | cut -d'|' -f4)
-
-            echo "KEYSTORE_BASE64=$KEYSTORE_BASE64" >> $GITHUB_ENV
-            echo "KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD" >> $GITHUB_ENV
-            echo "KEY_ALIAS=$KEY_ALIAS" >> $GITHUB_ENV
-            echo "KEY_PASSWORD=$KEY_PASSWORD" >> $GITHUB_ENV
-
-            echo "::add-mask::$KEYSTORE_BASE64"
-            echo "::add-mask::$KEYSTORE_PASSWORD"
-            echo "::add-mask::$KEY_ALIAS"
-            echo "::add-mask::$KEY_PASSWORD"
-
-            echo "✅ Keystore parameters extracted from KEYSTORE_SET"
-          else
-            echo "ℹ️ KEYSTORE_SET not provided, using separate secrets."
-            echo "KEYSTORE_BASE64=${{ secrets.KEYSTORE_BASE64 }}" >> $GITHUB_ENV
-            echo "KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
-            echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> $GITHUB_ENV
-            echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> $GITHUB_ENV
-          fi
-
-      - name: Check Secrets
-        run: |
-          echo "🔍 Checking required secrets..."
-          MISSING=0
-
-          check_secret() {
-            if [ -z "$1" ]; then
-              echo "❌ Missing secret: $2"
-              MISSING=1
-            fi
-          }
-
-          check_secret "$KEYSTORE_BASE64" "KEYSTORE_BASE64"
-          check_secret "$KEYSTORE_PASSWORD" "KEYSTORE_PASSWORD"
-          check_secret "$KEY_ALIAS" "KEY_ALIAS"
-          check_secret "$KEY_PASSWORD" "KEY_PASSWORD"
-
-          if [ "$MISSING" -eq 1 ]; then
-            echo "🛑 Missing required secrets. Stopping build."
-            exit 1
-          fi
-
-          echo "✅ All required secrets are present."
-
-      - name: Decode keystore file
-        run: |
-          mkdir -p "$RUNNER_TEMP/keystore"
-          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/keystore/keystore.jks"
-
-      - name: Validating keystore, alias and password
-        run: |
-          set -x
-          echo "🔐 Validating keystore, alias and password"
-
-          echo "test" > dummy.txt
-          zip -q dummy.jar dummy.txt
-          rm dummy.txt
-
-          JARSIGNER_LOG=$(mktemp)
-          if ! jarsigner \
-              -keystore "$RUNNER_TEMP/keystore/keystore.jks" \
-              -storepass "$KEYSTORE_PASSWORD" \
-              -keypass "$KEY_PASSWORD" \
-              dummy.jar "$KEY_ALIAS" > "$JARSIGNER_LOG" 2>&1; then
-            echo "❌ Either KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_PASSWORD, or KEY_ALIAS is incorrect"
-            echo "🔍 jarsigner error output:"
-            cat "$JARSIGNER_LOG"
-            rm -f "$JARSIGNER_LOG" dummy.jar
-            exit 1
-          fi
-          rm -f "$JARSIGNER_LOG" dummy.jar
-          echo "✅ Keystore, alias, and key password are valid."
-
       - name: Checkout source code at tag
         uses: actions/checkout@v5
         with:
@@ -213,9 +130,14 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Decode keystore file
+        run: |
+          mkdir -p "$RUNNER_TEMP/keystore"
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/keystore/keystore.jks"
+
       - name: Build APKs
         run: |
-              ./gradlew :app:assemble${{ env.BUILD_VARIANT }} :wear:assemble${{ env.BUILD_VARIANT }} \
+            ./gradlew :app:assemble${{ env.BUILD_VARIANT }} :wear:assemble${{ env.BUILD_VARIANT }} \
               -Dorg.gradle.jvmargs="-Xmx8g -XX:+UseParallelGC -Xss1024m" \
               -Dkotlin.daemon.jvm.options="-Xmx2g" \
               -Dkotlin.compiler.execution.strategy="in-process" \
@@ -223,9 +145,9 @@ jobs:
               -Dorg.gradle.workers.max=8 \
               -Dorg.gradle.caching=true \
               -Pandroid.injected.signing.store.file="$RUNNER_TEMP/keystore/keystore.jks" \
-              -Pandroid.injected.signing.store.password="$KEYSTORE_PASSWORD" \
-              -Pandroid.injected.signing.key.alias="$KEY_ALIAS" \
-              -Pandroid.injected.signing.key.password="$KEY_PASSWORD" \
+              -Pandroid.injected.signing.store.password="${{ secrets.KEYSTORE_PASSWORD }}" \
+              -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
+              -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}" \
               -PignoreUncommittedChanges=true
 
       - name: Rename APKs with version
