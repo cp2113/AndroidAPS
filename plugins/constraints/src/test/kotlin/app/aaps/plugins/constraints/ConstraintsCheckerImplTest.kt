@@ -12,6 +12,7 @@ import app.aaps.core.interfaces.db.PersistenceLayer
 import app.aaps.core.interfaces.plugin.PluginBase
 import app.aaps.core.interfaces.profiling.Profiler
 import app.aaps.core.interfaces.protection.PasswordCheck
+import app.aaps.core.interfaces.source.BgSource
 import app.aaps.core.interfaces.pump.DetailedBolusInfoStorage
 import app.aaps.core.interfaces.pump.PumpSync
 import app.aaps.core.interfaces.pump.TemporaryBasalStorage
@@ -39,7 +40,6 @@ import app.aaps.plugins.constraints.objectives.objectives.Objective7
 import app.aaps.plugins.constraints.objectives.objectives.Objective8
 import app.aaps.plugins.constraints.objectives.objectives.Objective9
 import app.aaps.plugins.constraints.safety.SafetyPlugin
-import app.aaps.plugins.source.GlimpPlugin
 import app.aaps.pump.dana.DanaPump
 import app.aaps.pump.dana.database.DanaHistoryDatabase
 import app.aaps.pump.dana.keys.DanaStringKey
@@ -66,7 +66,6 @@ class ConstraintsCheckerImplTest : TestBaseWithProfile() {
     @Mock lateinit var commandQueue: CommandQueue
     @Mock lateinit var detailedBolusInfoStorage: DetailedBolusInfoStorage
     @Mock lateinit var temporaryBasalStorage: TemporaryBasalStorage
-    @Mock lateinit var glimpPlugin: GlimpPlugin
     @Mock lateinit var profiler: Profiler
     @Mock lateinit var persistenceLayer: PersistenceLayer
     @Mock lateinit var pumpSync: PumpSync
@@ -223,11 +222,11 @@ class ConstraintsCheckerImplTest : TestBaseWithProfile() {
     // Safety
     @Test
     fun isAdvancedFilteringEnabledTest() {
-        whenever(activePlugin.activeBgSource).thenReturn(glimpPlugin)
+        whenever(activePlugin.activeBgSource).thenReturn(object : BgSource {})
         val c = constraintChecker.isAdvancedFilteringEnabled()
-        assertThat(c.reasonList).hasSize(1) // Safety
-        assertThat(c.mostLimitedReasonList).hasSize(1) // Safety
-        assertThat(c.value()).isFalse()
+        assertThat(c.reasonList).isEmpty()
+        assertThat(c.mostLimitedReasonList).isEmpty()
+        assertThat(c.value()).isTrue()
     }
 
     // SMB should limit

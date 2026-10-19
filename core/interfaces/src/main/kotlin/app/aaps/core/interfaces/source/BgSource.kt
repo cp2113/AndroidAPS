@@ -3,11 +3,13 @@ package app.aaps.core.interfaces.source
 interface BgSource {
 
     /**
-     *  Does bg source support advanced filtering ? Currently Dexcom native mode only
+     *  Does bg source support advanced filtering ?
      *
-     *  @return true if supported
+     *  All bg sources are considered trusted, so this returns true for every source.
+     *
+     *  @return true always
      */
-    fun advancedFilteringSupported(): Boolean = false
+    fun advancedFilteringSupported(): Boolean = true
 
     /**
      *  Sensor battery level in %

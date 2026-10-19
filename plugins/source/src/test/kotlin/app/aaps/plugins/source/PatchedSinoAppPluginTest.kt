@@ -21,6 +21,6 @@ class PatchedSinoAppPluginTest : TestBase() {
     }
 
     @Test fun advancedFilteringSupported() {
-        assertThat(patchedSinoAppPlugin.advancedFilteringSupported()).isFalse()
+        assertThat(patchedSinoAppPlugin.advancedFilteringSupported()).isTrue()
     }
 }

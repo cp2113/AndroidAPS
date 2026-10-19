@@ -58,8 +58,6 @@ class DexcomPlugin @Inject constructor(
         }
     }
 
-    override fun advancedFilteringSupported(): Boolean = true
-
     override fun onStart() {
         super.onStart()
         requestPermissionIfNeeded()

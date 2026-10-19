@@ -16,7 +16,7 @@ class GlimpPluginTest : TestBaseWithProfile() {
 
     @Test
     fun advancedFilteringSupported() {
-        assertThat(glimpPlugin.advancedFilteringSupported()).isFalse()
+        assertThat(glimpPlugin.advancedFilteringSupported()).isTrue()
     }
 
     @Test

@@ -3,7 +3,6 @@ package app.aaps.plugins.source
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
-import androidx.annotation.VisibleForTesting
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import app.aaps.core.data.model.GV
@@ -48,26 +47,7 @@ class XdripSourcePlugin @Inject constructor(
     aapsLogger, rh
 ), BgSource, XDripSource {
 
-    @VisibleForTesting
-    var advancedFiltering = false
     override var sensorBatteryLevel = -1
-
-    override fun advancedFilteringSupported(): Boolean = advancedFiltering
-
-    @VisibleForTesting
-    fun detectSource(glucoseValue: GV) {
-        advancedFiltering = arrayOf(
-            SourceSensor.DEXCOM_NATIVE_UNKNOWN,
-            SourceSensor.DEXCOM_G6_NATIVE,
-            SourceSensor.DEXCOM_G7_NATIVE,
-            SourceSensor.DEXCOM_G6_NATIVE_XDRIP,
-            SourceSensor.DEXCOM_G7_NATIVE_XDRIP,
-            SourceSensor.DEXCOM_G7_XDRIP,
-            SourceSensor.LIBRE_2,
-            SourceSensor.LIBRE_2_NATIVE,
-            SourceSensor.LIBRE_3,
-        ).any { it == glucoseValue.sourceSensor }
-    }
 
     // cannot be inner class because of needed injection
     class XdripSourceWorker(
@@ -136,7 +116,6 @@ class XdripSourcePlugin @Inject constructor(
                 persistenceLayer.insertCgmSourceData(Sources.Xdrip, glucoseValues, emptyList(), finalSensorStartTime)
                     .doOnError { ret = Result.failure(workDataOf("Error" to it.toString())) }
                     .blockingGet()
-                    .also { savedValues -> savedValues.all().forEach { xdripSourcePlugin.detectSource(it) } }
             else return Result.failure(workDataOf("Error" to "missing glucoseValue"))
             xdripSourcePlugin.sensorBatteryLevel = bundle.getInt(Intents.EXTRA_SENSOR_BATTERY, -1)
             return ret

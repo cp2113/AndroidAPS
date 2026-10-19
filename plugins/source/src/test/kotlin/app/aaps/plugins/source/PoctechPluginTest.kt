@@ -21,6 +21,6 @@ class PoctechPluginTest : TestBase() {
     }
 
     @Test fun advancedFilteringSupported() {
-        assertThat(poctechPlugin.advancedFilteringSupported()).isFalse()
+        assertThat(poctechPlugin.advancedFilteringSupported()).isTrue()
     }
 }

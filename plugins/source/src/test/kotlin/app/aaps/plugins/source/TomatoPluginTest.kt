@@ -22,7 +22,7 @@ class TomatoPluginTest : TestBase() {
 
     @Test
     fun advancedFilteringSupported() {
-        assertThat(tomatoPlugin.advancedFilteringSupported()).isFalse()
+        assertThat(tomatoPlugin.advancedFilteringSupported()).isTrue()
     }
 
 }

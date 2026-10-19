@@ -21,7 +21,6 @@ import app.aaps.core.data.time.T
 import app.aaps.core.data.ue.Sources
 import app.aaps.core.interfaces.db.PersistenceLayer
 import app.aaps.core.interfaces.pump.VirtualPump
-import app.aaps.core.interfaces.source.NSClientSource
 import app.aaps.core.keys.BooleanKey
 import app.aaps.shared.tests.TestBaseWithProfile
 import io.reactivex.rxjava3.core.Single
@@ -44,7 +43,6 @@ import org.mockito.kotlin.whenever
 class StoreDataForDbImplTest : TestBaseWithProfile() {
 
     @Mock private lateinit var persistenceLayer: PersistenceLayer
-    @Mock private lateinit var nsClientSource: NSClientSource
     @Mock private lateinit var virtualPump: VirtualPump
 
     private lateinit var storeDataForDb: StoreDataForDbImpl
@@ -154,7 +152,6 @@ class StoreDataForDbImplTest : TestBaseWithProfile() {
             persistenceLayer = persistenceLayer,
             preferences = preferences,
             config = config,
-            nsClientSource = nsClientSource,
             virtualPump = virtualPump
         )
     }
