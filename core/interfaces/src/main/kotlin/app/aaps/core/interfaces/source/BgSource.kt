@@ -7,7 +7,7 @@ interface BgSource {
      *
      *  @return true if supported
      */
-    fun advancedFilteringSupported(): Boolean = true
+    fun advancedFilteringSupported(): Boolean = false
 
     /**
      *  Sensor battery level in %
