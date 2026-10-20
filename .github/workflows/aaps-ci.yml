@@ -146,13 +146,6 @@ jobs:
               -Dorg.gradle.workers.max=8 \
               -Dorg.gradle.caching=true \
               -Pandroid.injected.signing.store.file="$RUNNER_TEMP/keystore/keystore.jks" \
-              -Pandroid.injected.signing.store.password="${{ secrets.KEYSTORE_PASSWORD }}" \
-              -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
-              -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}" \
-              -PreleaseStoreFile="$RUNNER_TEMP/keystore/keystore.jks" \
-              -PreleaseStorePassword="${{ secrets.KEYSTORE_PASSWORD }}" \
-              -PreleaseKeyAlias="${{ secrets.KEY_ALIAS }}" \
-              -PreleaseKeyPassword="${{ secrets.KEY_PASSWORD }}" \
               -PignoreUncommittedChanges=true
 
       - name: Rename APKs with version
