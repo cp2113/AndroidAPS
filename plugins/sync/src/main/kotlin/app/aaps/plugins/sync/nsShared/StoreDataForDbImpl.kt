@@ -26,7 +26,6 @@ import app.aaps.core.interfaces.nsclient.StoreDataForDb
 import app.aaps.core.interfaces.pump.VirtualPump
 import app.aaps.core.interfaces.rx.bus.RxBus
 import app.aaps.core.interfaces.rx.events.EventNSClientNewLog
-import app.aaps.core.interfaces.source.NSClientSource
 import app.aaps.core.keys.BooleanKey
 import app.aaps.core.keys.interfaces.Preferences
 import java.util.concurrent.Executors
@@ -42,7 +41,6 @@ class StoreDataForDbImpl @Inject constructor(
     private val persistenceLayer: PersistenceLayer,
     private val preferences: Preferences,
     private val config: Config,
-    private val nsClientSource: NSClientSource,
     private val virtualPump: VirtualPump
 ) : StoreDataForDb {
 
@@ -106,18 +104,9 @@ class StoreDataForDbImpl @Inject constructor(
                     persistenceLayer.insertCgmSourceData(Sources.NSClient, it.toMutableList(), emptyList(), null)
                         .blockingGet()
                         .also { result ->
-                            result.updated.forEach { gv ->
-                                nsClientSource.detectSource(gv)
-                                updated.inc(GV::class.java.simpleName)
-                            }
-                            result.inserted.forEach { gv ->
-                                nsClientSource.detectSource(gv)
-                                inserted.inc(GV::class.java.simpleName)
-                            }
-                            result.updatedNsId.forEach { gv ->
-                                nsClientSource.detectSource(gv)
-                                nsIdUpdated.inc(GV::class.java.simpleName)
-                            }
+                            result.updated.forEach { updated.inc(GV::class.java.simpleName) }
+                            result.inserted.forEach { inserted.inc(GV::class.java.simpleName) }
+                            result.updatedNsId.forEach { nsIdUpdated.inc(GV::class.java.simpleName) }
                             sendLog("GlucoseValue", GV::class.java.simpleName)
                         }
                     SystemClock.sleep(pause)

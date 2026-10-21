@@ -41,8 +41,6 @@ class SyaiPlugin @Inject constructor(
     aapsLogger, rh, preferences
 ), BgSource {
 
-    override fun advancedFilteringSupported(): Boolean = true
-
     class SyaiWorker(
         context: Context,
         params: WorkerParameters

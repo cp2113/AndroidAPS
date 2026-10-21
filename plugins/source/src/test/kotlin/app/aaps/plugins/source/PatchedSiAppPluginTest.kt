@@ -21,6 +21,6 @@ class PatchedSiAppPluginTest : TestBase() {
     }
 
     @Test fun advancedFilteringSupported() {
-        assertThat(patchedSiAppPlugin.advancedFilteringSupported()).isFalse()
+        assertThat(patchedSiAppPlugin.advancedFilteringSupported()).isTrue()
     }
 }
