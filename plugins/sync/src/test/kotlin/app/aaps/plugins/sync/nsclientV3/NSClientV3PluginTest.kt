@@ -76,7 +76,7 @@ internal class NSClientV3PluginTest : TestBaseWithProfile() {
     fun prepare() {
         whenever(insulin.iCfg).thenReturn(insulinConfiguration)
         whenever(activePlugin.activeInsulin).thenReturn(insulin)
-        storeDataForDb = StoreDataForDbImpl(aapsLogger, rxBus, persistenceLayer, preferences, config, nsClientSource, virtualPump)
+        storeDataForDb = StoreDataForDbImpl(aapsLogger, rxBus, persistenceLayer, preferences, config, virtualPump)
         sut =
             NSClientV3Plugin(
                 aapsLogger, rh, preferences, aapsSchedulers, rxBus, context, fabricPrivacy,

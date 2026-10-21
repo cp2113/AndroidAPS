@@ -9,6 +9,7 @@ import app.aaps.core.interfaces.constraints.ConstraintsChecker
 import app.aaps.core.interfaces.db.PersistenceLayer
 import app.aaps.core.interfaces.iob.GlucoseStatusProvider
 import app.aaps.core.interfaces.profiling.Profiler
+import app.aaps.core.interfaces.source.BgSource
 import app.aaps.core.interfaces.stats.TddCalculator
 import app.aaps.core.interfaces.ui.UiInteraction
 import app.aaps.core.keys.BooleanKey
@@ -21,7 +22,6 @@ import app.aaps.plugins.aps.openAPSAMA.OpenAPSAMAPlugin
 import app.aaps.plugins.aps.openAPSSMB.DetermineBasalSMB
 import app.aaps.plugins.aps.openAPSSMB.GlucoseStatusCalculatorSMB
 import app.aaps.plugins.aps.openAPSSMB.OpenAPSSMBPlugin
-import app.aaps.plugins.source.GlimpPlugin
 import app.aaps.pump.virtual.VirtualPumpPlugin
 import app.aaps.shared.tests.TestBaseWithProfile
 import com.google.common.truth.Truth.assertThat
@@ -35,7 +35,6 @@ class SafetyPluginTest : TestBaseWithProfile() {
 
     @Mock lateinit var constraintChecker: ConstraintsChecker
     @Mock lateinit var virtualPumpPlugin: VirtualPumpPlugin
-    @Mock lateinit var glimpPlugin: GlimpPlugin
     @Mock lateinit var profiler: Profiler
     @Mock lateinit var persistenceLayer: PersistenceLayer
     @Mock lateinit var glucoseStatusProvider: GlucoseStatusProvider
@@ -127,11 +126,11 @@ class SafetyPluginTest : TestBaseWithProfile() {
     }
 
     @Test
-    fun bgSourceShouldPreventSMBAlways() {
-        whenever(activePlugin.activeBgSource).thenReturn(glimpPlugin)
+    fun anyBgSourceAllowsSMBAlways() {
+        whenever(activePlugin.activeBgSource).thenReturn(object : BgSource {})
         val c = safetyPlugin.isAdvancedFilteringEnabled(ConstraintObject(true, aapsLogger))
-        assertThat(c.getReasons()).isEqualTo("Safety: SMB always and after carbs disabled because active BG source doesn\\'t support advanced filtering")
-        assertThat(c.value()).isFalse()
+        assertThat(c.getReasons()).isEmpty()
+        assertThat(c.value()).isTrue()
     }
 
     @Test
