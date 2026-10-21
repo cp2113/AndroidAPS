@@ -47,9 +47,6 @@ class XdripSourcePlugin @Inject constructor(
     aapsLogger, rh
 ), BgSource, XDripSource {
 
-    override var sensorBatteryLevel = -1
-
-    // cannot be inner class because of needed injection
     class XdripSourceWorker(
         context: Context,
         params: WorkerParameters
