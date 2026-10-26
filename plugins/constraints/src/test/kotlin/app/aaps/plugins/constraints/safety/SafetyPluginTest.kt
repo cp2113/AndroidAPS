@@ -130,7 +130,7 @@ class SafetyPluginTest : TestBaseWithProfile() {
     fun bgSourceShouldPreventSMBAlways() {
         whenever(activePlugin.activeBgSource).thenReturn(glimpPlugin)
         val c = safetyPlugin.isAdvancedFilteringEnabled(ConstraintObject(true, aapsLogger))
-        assertThat(c.getReasons()).isEqualTo("Safety: 2610260844-4 SMB always and after carbs disabled because active BG source doesn\\'t support advanced filtering")
+        assertThat(c.getReasons()).isEqualTo("Safety: SMB always and after carbs disabled because active BG source doesn\\'t support advanced filtering")
         assertThat(c.value()).isFalse()
     }
 
