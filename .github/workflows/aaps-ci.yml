@@ -3,40 +3,6 @@ name: AAPS CI
 on:
   workflow_dispatch:
     inputs:
-      tagName:
-        description: 'Select AAPS Version'
-        required: true
-        default: '3.4.2.6'
-        type: choice
-        options:
-          # ── 3.4.x (JDK 21) ──────────────────────────────
-          - 3.4.2.6
-          - 3.4.2.4
-          - 3.4.2.3
-          - 3.4.2.2
-          - 3.4.2.1
-          - 3.4.2.0
-          - 3.4.1.0
-          - 3.4.0.0
-          # ── 3.3.x (JDK 21) ──────────────────────────────
-          - 3.3.2.1
-          - 3.3.2.0
-          - 3.3.1.3
-          # ── 3.2.x (JDK 17) ──────────────────────────────
-          - 3.2.0.4
-          - 3.2.0.3
-          - 3.2.0.2
-          - 3.2.0.1
-          - 3.2.0.0
-          # ── 3.1.x (JDK 17) ──────────────────────────────
-          - 3.1.0.3
-          - 3.1.0.2
-          - 3.1.0.1
-          - 3.1.0
-          # ── 3.0.x (JDK 11) ──────────────────────────────
-          - 3.0.0.2
-          - 3.0.0.1
-          - 3.0.0
       buildVariant:
         description: 'Select Build Variant'
         required: true
@@ -140,34 +106,13 @@ jobs:
           rm -f "$JARSIGNER_LOG" dummy.jar
           echo "✅ Keystore, alias, and key password are valid."
 
-      - name: Checkout source code at tag
+      - name: Checkout source code
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      - name: Fetch selected tag from upstream
-        run: |
-          git remote add upstream https://github.com/nightscout/AndroidAPS.git || true
-          git fetch upstream refs/tags/${{ github.event.inputs.tagName }}:refs/tags/${{ github.event.inputs.tagName }}
-          echo "✅ Tag ${{ github.event.inputs.tagName }} fetched from upstream."
-
-      - name: Determine JVM version from tag
-        run: |
-          TAG="${{ github.event.inputs.tagName }}"
-          JAVA_VERSION=$(jq -r '.default' .github/jdk-map.json)
-          while IFS=$'\t' read -r pattern jdk; do
-            if [[ "$TAG" == $pattern ]]; then
-              JAVA_VERSION="$jdk"
-              break
-            fi
-          done < <(jq -r '.mappings[] | "\(.pattern)\t\(.jdk)"' .github/jdk-map.json)
-          echo "JAVA_VERSION=$JAVA_VERSION" >> $GITHUB_ENV
-          echo "ℹ️ Tag $TAG → JDK $JAVA_VERSION (from jdk-map.json)"
-
-      - name: Switch to selected tag
-        run: |
-          git checkout refs/tags/${{ github.event.inputs.tagName }}
-          echo "✅ Checked out tag ${{ github.event.inputs.tagName }}"
+      - name: Set JVM version
+        run: echo "JAVA_VERSION=21" >> $GITHUB_ENV
 
       - name: Patch for Android 16 (Remove sharedUserId)
         run: |
