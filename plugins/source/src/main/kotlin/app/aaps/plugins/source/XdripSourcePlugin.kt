@@ -95,13 +95,6 @@ class XdripSourcePlugin @Inject constructor(
 
             aapsLogger.debug(LTag.BGSOURCE, "Received xDrip data: $bundle")
 
-            val rawSensor = SourceSensor.fromString(bundle.getString(Intents.XDRIP_DATA_SOURCE) ?: "")
-            val sensorToUse = if (rawSensor == SourceSensor.UNKNOWN || rawSensor == SourceSensor.OTHER) {
-                SourceSensor.DEXCOM_G6_NATIVE_XDRIP
-            } else {
-                rawSensor
-            }
-
             val glucoseValues = mutableListOf<GV>()
             glucoseValues += GV(
                 timestamp = bundle.getLong(Intents.EXTRA_TIMESTAMP, 0),
@@ -109,7 +102,7 @@ class XdripSourcePlugin @Inject constructor(
                 raw = round(bundle.getDouble(Intents.EXTRA_RAW, 0.0)),
                 noise = null,
                 trendArrow = TrendArrow.fromString(bundle.getString(Intents.EXTRA_BG_SLOPE_NAME)),
-                sourceSensor = sensorToUse
+                sourceSensor = SourceSensor.DEXCOM_G6_NATIVE_XDRIP
             )
             val newSensorStartTime = getSensorStartTime(bundle)
             // Retrieve last stored sensorStartTime from the database
