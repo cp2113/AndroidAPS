@@ -69,7 +69,7 @@ class SafetyPluginTest : TestBaseWithProfile() {
         whenever(rh.gs(app.aaps.plugins.aps.R.string.increasing_max_basal)).thenReturn("Increasing max basal value because setting is lower than your max basal in profile")
         whenever(rh.gs(app.aaps.plugins.aps.R.string.smb_disabled_in_preferences)).thenReturn("SMB disabled in preferences")
         whenever(rh.gs(app.aaps.plugins.constraints.R.string.closed_loop_disabled_on_dev_branch)).thenReturn("Running dev version. Closed loop is disabled.")
-        whenever(rh.gs(app.aaps.plugins.constraints.R.string.smbalwaysdisabled)).thenReturn("SMB always and after carbs disabled because active BG source doesn\\'t support advanced filtering")
+        whenever(rh.gs(app.aaps.plugins.constraints.R.string.smbalwaysdisabled)).thenReturn("2610260844 SMB always and after carbs disabled because active BG source doesn\\'t support advanced filtering")
         whenever(rh.gs(app.aaps.plugins.constraints.R.string.smbnotallowedinopenloopmode)).thenReturn("SMB not allowed in open loop mode")
         whenever(rh.gs(app.aaps.core.ui.R.string.lowglucosesuspend)).thenReturn("Low Glucose Suspend")
 
@@ -130,7 +130,7 @@ class SafetyPluginTest : TestBaseWithProfile() {
     fun bgSourceShouldPreventSMBAlways() {
         whenever(activePlugin.activeBgSource).thenReturn(glimpPlugin)
         val c = safetyPlugin.isAdvancedFilteringEnabled(ConstraintObject(true, aapsLogger))
-        assertThat(c.getReasons()).isEqualTo("Safety: SMB always and after carbs disabled because active BG source doesn\\'t support advanced filtering")
+        assertThat(c.getReasons()).isEqualTo("Safety: 2610260844 SMB always and after carbs disabled because active BG source doesn\\'t support advanced filtering")
         assertThat(c.value()).isFalse()
     }
 
