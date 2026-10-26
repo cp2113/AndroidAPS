@@ -36,13 +36,19 @@ class NSClientSourcePlugin @Inject constructor(
     var lastBGTimeStamp: Long = 0
 
     @VisibleForTesting
-    var isAdvancedFilteringEnabled = true
+    var isAdvancedFilteringEnabled = false
 
-    override fun advancedFilteringSupported(): Boolean = true
+    override fun advancedFilteringSupported(): Boolean = isAdvancedFilteringEnabled
 
     override fun detectSource(glucoseValue: GV) {
         if (glucoseValue.timestamp > lastBGTimeStamp) {
-            isAdvancedFilteringEnabled = true
+            isAdvancedFilteringEnabled = arrayOf(
+                SourceSensor.DEXCOM_NATIVE_UNKNOWN,
+                SourceSensor.DEXCOM_G6_NATIVE,
+                SourceSensor.DEXCOM_G7_NATIVE,
+                SourceSensor.DEXCOM_G6_NATIVE_XDRIP,
+                SourceSensor.DEXCOM_G7_NATIVE_XDRIP,
+            ).any { it == glucoseValue.sourceSensor }
             lastBGTimeStamp = glucoseValue.timestamp
         }
     }
