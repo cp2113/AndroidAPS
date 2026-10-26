@@ -49,24 +49,14 @@ class XdripSourcePlugin @Inject constructor(
 ), BgSource, XDripSource {
 
     @VisibleForTesting
-    var advancedFiltering = false
+    var advancedFiltering = true
     override var sensorBatteryLevel = -1
 
-    override fun advancedFilteringSupported(): Boolean = advancedFiltering
+    override fun advancedFilteringSupported(): Boolean = true
 
     @VisibleForTesting
     fun detectSource(glucoseValue: GV) {
-        advancedFiltering = arrayOf(
-            SourceSensor.DEXCOM_NATIVE_UNKNOWN,
-            SourceSensor.DEXCOM_G6_NATIVE,
-            SourceSensor.DEXCOM_G7_NATIVE,
-            SourceSensor.DEXCOM_G6_NATIVE_XDRIP,
-            SourceSensor.DEXCOM_G7_NATIVE_XDRIP,
-            SourceSensor.DEXCOM_G7_XDRIP,
-            SourceSensor.LIBRE_2,
-            SourceSensor.LIBRE_2_NATIVE,
-            SourceSensor.LIBRE_3,
-        ).any { it == glucoseValue.sourceSensor }
+        advancedFiltering = true
     }
 
     // cannot be inner class because of needed injection
@@ -104,6 +94,14 @@ class XdripSourcePlugin @Inject constructor(
                 ?: return Result.failure(workDataOf("Error" to "missing input data"))
 
             aapsLogger.debug(LTag.BGSOURCE, "Received xDrip data: $bundle")
+
+            val rawSensor = SourceSensor.fromString(bundle.getString(Intents.XDRIP_DATA_SOURCE) ?: "")
+            val sensorToUse = if (rawSensor == SourceSensor.UNKNOWN || rawSensor == SourceSensor.OTHER) {
+                SourceSensor.DEXCOM_G6_NATIVE_XDRIP
+            } else {
+                rawSensor
+            }
+
             val glucoseValues = mutableListOf<GV>()
             glucoseValues += GV(
                 timestamp = bundle.getLong(Intents.EXTRA_TIMESTAMP, 0),
@@ -111,7 +109,7 @@ class XdripSourcePlugin @Inject constructor(
                 raw = round(bundle.getDouble(Intents.EXTRA_RAW, 0.0)),
                 noise = null,
                 trendArrow = TrendArrow.fromString(bundle.getString(Intents.EXTRA_BG_SLOPE_NAME)),
-                sourceSensor = SourceSensor.fromString(bundle.getString(Intents.XDRIP_DATA_SOURCE) ?: "")
+                sourceSensor = sensorToUse
             )
             val newSensorStartTime = getSensorStartTime(bundle)
             // Retrieve last stored sensorStartTime from the database
