@@ -312,6 +312,41 @@
                     android:layout_span="1"
                     app:srcCompat="@drawable/equil_ic_pump2" />
             </TableRow>
+
+            <!-- ÚJ RÉSZ: Légtelenítés biztonsági beviteli mezője -->
+            <TableRow
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="12dp"
+                android:gravity="center_horizontal">
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_span="2"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical">
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tv_bleed_hint"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="If you only want to bleed the system, enter “air”!"
+                        android:textColor="#FFAA00"
+                        android:textSize="12sp" />
+
+                    <androidx.appcompat.widget.AppCompatEditText
+                        android:id="@+id/et_bleed_code"
+                        android:layout_width="160dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:hint="enter 'air'"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:textSize="14sp" />
+                </androidx.appcompat.widget.LinearLayoutCompat>
+            </TableRow>
+
         </TableLayout>
     </androidx.core.widget.NestedScrollView>
 
