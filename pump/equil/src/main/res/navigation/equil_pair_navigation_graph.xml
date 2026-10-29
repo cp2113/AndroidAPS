@@ -27,9 +27,15 @@
         android:name="app.aaps.pump.equil.ui.pair.EquilChangeInsulinFragment"
         android:label="StartEquilSerialNumberFragment">
 
+        <!-- Meglévő: ugrás a normál összeszerelésre -->
         <action
             android:id="@+id/action_startEquilChangeInsulinFragment_to_startEquilPairAssembleFragment"
             app:destination="@id/startEquilActivationFragment" />
+
+        <!-- ÚJ: Közvetlen ugrás a légtelenítés (Air) képernyőre -->
+        <action
+            android:id="@+id/action_startEquilChangeInsulinFragment_to_startEquilPairAirFragment"
+            app:destination="@id/startEquilPairAirFragment" />
     </fragment>
     <fragment
         android:id="@+id/startEquilPairFillFragment"
