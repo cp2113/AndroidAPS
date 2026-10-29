@@ -306,6 +306,13 @@ class EquilFragment : DaggerFragment() {
 
     @Synchronized
     fun changeInsulin() {
+        // 1. Kiolvassuk az "air" kulcsszót a beviteli mezőből
+        val isBleedOnly = _binding?.etBleedCode?.text?.toString()?.trim()?.equals("air", ignoreCase = true) == true
+
+        // 2. Ha "air" volt, töröljük a mezőt, hogy ne maradjon ott véletlenül
+        if (isBleedOnly) {
+            _binding?.etBleedCode?.text?.clear()
+        }
 
         activity?.let { activity ->
             context?.let { context ->
@@ -314,6 +321,8 @@ class EquilFragment : DaggerFragment() {
                     UIRunnable {
                         val intent = Intent(context, EquilPairActivity::class.java)
                         intent.putExtra(EquilPairActivity.KEY_TYPE, EquilPairActivity.Type.CHANGE_INSULIN)
+                        // 3. Átadjuk az új flaget
+                        intent.putExtra("EXTRA_BLEED_ONLY", isBleedOnly)
                         startActivity(intent)
                     }
                 )
