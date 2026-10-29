@@ -25,6 +25,7 @@ class EquilPairActivity : TranslatedDaggerAppCompatActivity() {
 
         const val KEY_TYPE = "EquilType"
         const val KEY_START_DESTINATION = "startDestination"
+        const val EXTRA_BLEED_ONLY = "EXTRA_BLEED_ONLY"
     }
 
     enum class Type {
@@ -35,10 +36,16 @@ class EquilPairActivity : TranslatedDaggerAppCompatActivity() {
     @IdRes
     private var startDestination: Int = R.id.startEquilActivationFragment
     var pair: Boolean = false
+    var isBleedOnly: Boolean = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.equil_pair_activity)
+
+        // Beolvassuk a légtelenítés mód flaget (mentett állapotból vagy intentből)
+        isBleedOnly = savedInstanceState?.getBoolean(EXTRA_BLEED_ONLY)
+            ?: intent.getBooleanExtra(EXTRA_BLEED_ONLY, false)
 
         // Add menu items without overriding methods in the Activity
         equilMenuProvider = object : MenuProvider {
@@ -81,6 +88,7 @@ class EquilPairActivity : TranslatedDaggerAppCompatActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putInt(KEY_START_DESTINATION, startDestination)
+        outState.putBoolean(EXTRA_BLEED_ONLY, isBleedOnly)
     }
 
     fun exitActivityAfterConfirmation() {
