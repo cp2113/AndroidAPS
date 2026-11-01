@@ -24,25 +24,40 @@ class EquilChangeInsulinFragment : EquilPairFragmentBase() {
             .into(view.findViewById(R.id.imv))
 
         view.findViewById<Button>(R.id.button_next).setOnClickListener {
-            showLoading()
-            commandQueue.customCommand(CmdInsulinChange(aapsLogger, preferences, equilManager), object : Callback() {
-                override fun run() {
-                    dismissLoading()
-                    if (result.success) {
-                        equilPumpPlugin.resetData()
-                        equilManager.setRunMode(RunMode.STOP)
-                        runOnUiThread {
-                            if (isAdded) {
-                                val nextPage = getNextPageActionId()
-                                findNavController().navigate(nextPage)
-                            }
-                        }
-                    } else {
-                        dismissLoading()
-                        ToastUtils.errorToast(requireContext(), rh.gs(R.string.equil_error))
-                    }
+            val isBleedOnly = (activity as? EquilPairActivity)?.isBleedOnly == true
+
+            if (isBleedOnly) {
+                // --- CSAK LÉGTELENÍTÉS MÓD ---
+                // 1. Nem hívjuk meg a CmdInsulinChange-t -> a motor NEM teker vissza
+                // 2. Nem hívjuk meg a resetData()-t -> a tartály inzulinszintje megmarad
+                equilManager.setRunMode(RunMode.STOP)
+
+                // Közvetlen ugrás az Air (Légtelenítés) képernyőre:
+                if (isAdded) {
+                    findNavController().navigate(R.id.action_startEquilChangeInsulinFragment_to_startEquilPairAirFragment)
                 }
-            })
+            } else {
+                // --- NORMÁL PATRONCSERE MÓD ---
+                showLoading()
+                commandQueue.customCommand(CmdInsulinChange(aapsLogger, preferences, equilManager), object : Callback() {
+                    override fun run() {
+                        dismissLoading()
+                        if (result.success) {
+                            equilPumpPlugin.resetData()
+                            equilManager.setRunMode(RunMode.STOP)
+                            runOnUiThread {
+                                if (isAdded) {
+                                    val nextPage = getNextPageActionId()
+                                    findNavController().navigate(nextPage)
+                                }
+                            }
+                        } else {
+                            dismissLoading()
+                            ToastUtils.errorToast(requireContext(), rh.gs(R.string.equil_error))
+                        }
+                    }
+                })
+            }
         }
     }
 
