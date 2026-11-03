@@ -162,7 +162,7 @@ class XdripSourcePlugin(
                 raw = round(bundle.getDouble(Intents.EXTRA_RAW, 0.0)),
                 noise = null,
                 trendArrow = TrendArrow.fromString(bundle.getString(Intents.EXTRA_BG_SLOPE_NAME)),
-                sourceSensor = SourceSensor.DEXCOM_G6_NATIVE_XDRIP
+                sourceSensor = SourceSensor.DEXCOM_G6
             )
             val newSensorStartTime = getSensorStartTime(bundle)
             // Retrieve last stored sensorStartTime from the database
