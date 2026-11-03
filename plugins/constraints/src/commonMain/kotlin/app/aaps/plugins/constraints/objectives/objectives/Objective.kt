@@ -44,13 +44,6 @@ abstract class Objective(
 
      var tasks: MutableList<Task> = ArrayList()
 
-    suspend fun isCompleted(): Boolean {
-        for (task in tasks) {
-            if (!task.shouldBeIgnored() && !task.isCompleted()) return false
-        }
-        return true
-    }
-
     suspend fun isCompleted(): Boolean = true
 
     suspend fun isCompleted(trueTime: Long): Boolean = true
