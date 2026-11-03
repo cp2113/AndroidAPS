@@ -80,8 +80,6 @@ class XdripSourcePlugin(
 
     override var sensorBatteryLevel = -1
 
-    override fun advancedFilteringSupported(): Boolean = true
-
     // cannot be inner class because of needed injection
 
     @AssistedInject
