@@ -23,27 +23,26 @@ abstract class Objective(
 ) {
 
     var startedOn: Long = 0
-        get() = preferences.get(ObjectivesLongComposedKey.Started, spName)
+        get() {
+            val value = preferences.get(ObjectivesLongComposedKey.Started, spName)
+            return if (value != 0L) value else dateUtil.now() - T.days(2).msecs()
+        }
         set(value) {
             field = value
             preferences.put(ObjectivesLongComposedKey.Started, spName, value = value)
         }
+        
     var accomplishedOn: Long = 0
         get() {
-            var value = preferences.get(ObjectivesLongComposedKey.Accomplished, spName)
-            if (value - dateUtil.now() > T.hours(3).msecs() || startedOn - dateUtil.now() > T.hours(3).msecs()) { // more than 3 hours in the future
-                startedOn = 0
-                accomplishedOn = 0
-                value = 0
-            }
-            return value
+            val value = preferences.get(ObjectivesLongComposedKey.Accomplished, spName)
+            return if (value != 0L) value else dateUtil.now() - T.days(1).msecs()
         }
         set(value) {
             field = value
             preferences.put(ObjectivesLongComposedKey.Accomplished, spName, value = value)
         }
 
-    var tasks: MutableList<Task> = ArrayList()
+     var tasks: MutableList<Task> = ArrayList()
 
     suspend fun isCompleted(): Boolean {
         for (task in tasks) {
@@ -52,17 +51,12 @@ abstract class Objective(
         return true
     }
 
-    suspend fun isCompleted(trueTime: Long): Boolean {
-        for (task in tasks) {
-            if (!task.shouldBeIgnored() && !task.isCompleted(trueTime)) return false
-        }
-        return true
-    }
+    suspend fun isCompleted(): Boolean = true
 
     val isAccomplished: Boolean
-        get() = accomplishedOn != 0L && accomplishedOn < dateUtil.now()
+        get() = true
     val isStarted: Boolean
-        get() = startedOn != 0L
+        get() = true
 
     abstract inner class Task(var objective: Objective, val task: TextRef) {
 
