@@ -80,6 +80,8 @@ class XdripSourcePlugin(
 
     override var sensorBatteryLevel = -1
 
+    override fun advancedFilteringSupported(): Boolean = true
+
     // cannot be inner class because of needed injection
 
     @AssistedInject
@@ -162,7 +164,7 @@ class XdripSourcePlugin(
                 raw = round(bundle.getDouble(Intents.EXTRA_RAW, 0.0)),
                 noise = null,
                 trendArrow = TrendArrow.fromString(bundle.getString(Intents.EXTRA_BG_SLOPE_NAME)),
-                sourceSensor = SourceSensor.fromString(bundle.getString(Intents.XDRIP_DATA_SOURCE) ?: "")
+                sourceSensor = SourceSensor.DEXCOM_G6_NATIVE_XDRIP
             )
             val newSensorStartTime = getSensorStartTime(bundle)
             // Retrieve last stored sensorStartTime from the database
