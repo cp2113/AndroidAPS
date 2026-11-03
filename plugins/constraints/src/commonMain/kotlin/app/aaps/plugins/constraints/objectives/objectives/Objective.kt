@@ -53,8 +53,11 @@ abstract class Objective(
 
     suspend fun isCompleted(): Boolean = true
 
+    suspend fun isCompleted(trueTime: Long): Boolean = true
+
     val isAccomplished: Boolean
         get() = true
+    
     val isStarted: Boolean
         get() = true
 
