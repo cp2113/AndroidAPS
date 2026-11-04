@@ -557,10 +557,8 @@ class EquilManager(
         loaded.lastDataTime = System.currentTimeMillis()
         loaded.bluetoothConnectionState = BluetoothConnectionState.CONNECTED
 
-        // Beállítjuk a titkosításhoz és kommunikációhoz szükséges kulcsokat is a beállításokba
-        preferences.put(EquilStringKey.DeviceAddress, "00:00:00:00:00:00")
-        preferences.put(EquilStringKey.SerialNumber, "A00001")
         preferences.put(EquilStringKey.Password, "FEDCBA9876543210FEDCBA9876543210FEDCBA9876543210FEDCBA9876543210")
+        preferences.put(EquilStringKey.PairPassword, "")
 
         equilState = loaded
         storePodState()
