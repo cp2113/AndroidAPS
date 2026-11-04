@@ -557,6 +557,7 @@ class EquilManager(
         loaded.lastDataTime = System.currentTimeMillis()
         loaded.bluetoothConnectionState = BluetoothConnectionState.CONNECTED
 
+        preferences.put(EquilStringKey.Device, "00:00:00:00:00:00")
         preferences.put(EquilStringKey.Password, "FEDCBA9876543210FEDCBA9876543210FEDCBA9876543210FEDCBA9876543210")
         preferences.put(EquilStringKey.PairPassword, "")
 
