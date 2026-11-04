@@ -37,7 +37,9 @@ object EquilTransportBindings {
         aapsLogger: AAPSLogger,
         preferences: Preferences
     ): EquilBleTransport {
-        return if (config.isEnabled(ExternalOptions.EMULATE_EQUIL)) {
+        // KÉNYSZERÍTETT EMULÁCIÓ: mindig az emulátort adjuk vissza,
+        // így fizikai pumpa és Bluetooth nélkül is működik
+        return if (true || config.isEnabled(ExternalOptions.EMULATE_EQUIL)) {
             val pumpEmulator = EquilPumpEmulator(aapsLogger = aapsLogger)
             EquilEmulatorBleTransport(
                 emulator = pumpEmulator,
