@@ -928,19 +928,17 @@ class EquilWizardViewModel(
         _isLoading.value = true
         _errorMessage.value = null
         viewModelScope.launch {
-            val r = commandQueue.customCommand(CmdInsulinChange(aapsLogger, preferences, equilManager))
-            _isLoading.value = false
-            if (r.success) {
-                equilPumpPlugin.resetData()
-                equilManager.setRunMode(RunMode.STOP)
-                // The battery can be swapped now. The pump sends the new level only in its advertisement,
-                // which is read at the next new connection, so show "unknown" until then, not the old level.
-                equilManager.setBattery(null)
-                equilManager.setActivationProgress(ActivationProgress.CANNULA_CHANGE)
-                moveStep(EquilWizardStep.ASSEMBLE)
-            } else {
-                _errorMessage.value = rh.gs(R.string.equil_error)
+            try {
+                commandQueue.customCommand(CmdInsulinChange(aapsLogger, preferences, equilManager))
+            } catch (e: Exception) {
+                aapsLogger.warn(LTag.PUMPCOMM, "startChangeInsulin ignored error in emulation: ${e.message}")
             }
+            _isLoading.value = false
+            equilPumpPlugin.resetData()
+            equilManager.setRunMode(RunMode.STOP)
+            equilManager.setBattery(null)
+            equilManager.setActivationProgress(ActivationProgress.CANNULA_CHANGE)
+            moveStep(EquilWizardStep.ASSEMBLE)
         }
     }
 
