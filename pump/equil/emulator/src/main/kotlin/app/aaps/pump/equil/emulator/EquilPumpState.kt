@@ -41,6 +41,10 @@ class EquilPumpState {
     // Motor resistance (CmdResistanceGet) — >= 500 means piston reached insulin
     var resistance: Int = 600
 
+    // Insulin change & reservoir filling state
+    var isChangingInsulin: Boolean = false
+    var reservoirSteps: Int = 0
+
     // Running mode (0=stopped, 1=running, 2=suspended)
     var runningMode: Int = 1
 
@@ -73,6 +77,35 @@ class EquilPumpState {
 
     /** Pairing: password key (32 hex bytes = 64 hex chars) returned to app during CmdPair */
     var pairingPasswordKey: String = "FEDCBA9876543210FEDCBA9876543210FEDCBA9876543210FEDCBA9876543210"
+
+    /**
+     * Resets the resistance and steps when insulin/reservoir change starts.
+     */
+    fun startInsulinChange() {
+        isChangingInsulin = true
+        reservoirSteps = 0
+        resistance = 100 // < 500 means piston has not yet reached insulin
+    }
+
+    /**
+     * Accumulates steps during filling/priming. Once threshold is reached,
+     * motor resistance jumps to >= 500 (600), signaling completion.
+     */
+    fun addReservoirSteps(steps: Int) {
+        reservoirSteps += steps
+        if (reservoirSteps >= 20) {
+            resistance = 600
+        }
+    }
+
+    /**
+     * Completes insulin change and updates reservoir units.
+     */
+    fun finishInsulinChange(newInsulinUnits: Int = 200) {
+        isChangingInsulin = false
+        resistance = 600
+        currentInsulin = newInsulinUnits
+    }
 }
 
 data class HistoryEvent(
