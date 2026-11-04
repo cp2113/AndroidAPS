@@ -131,6 +131,8 @@ class EquilManager(
             podStateLoaded = true
         }
         equilBLE.init(this)
+        // Automatikus csatlakozás az emulátorhoz indításkor
+        connect()
     }
 
     fun getEquilError(port: Int, type: Int, level: Int): String =
@@ -542,11 +544,26 @@ class EquilManager(
                 EquilState()
             }
         }
-        // The connection state is stored with the rest, but no BLE link survives an app restart. A stored
-        // CONNECTING made the queue wait for a connect that was never started, until its 2 min timeout.
-        loaded.bluetoothConnectionState = BluetoothConnectionState.DISCONNECTED
+
+        // --- EMULÁTOR: FIX PÁROSÍTOTT ÉS CSATLAKOZTATOTT ÁLLAPOT KÉNYSZERÍTÉSE ---
+        loaded.activationProgress = ActivationProgress.COMPLETED
+        loaded.serialNumber = "A00001"
+        loaded.address = "00:00:00:00:00:00"
+        loaded.firmwareVersion = "5.5"
+        loaded.currentInsulin = 150
+        loaded.startInsulin = 200
+        loaded.battery = 80
+        loaded.runMode = RunMode.RUN
+        loaded.lastDataTime = System.currentTimeMillis()
+        loaded.bluetoothConnectionState = BluetoothConnectionState.CONNECTED
+
+        // Beállítjuk a titkosításhoz és kommunikációhoz szükséges kulcsokat is a beállításokba
+        preferences.put(EquilStringKey.DeviceAddress, "00:00:00:00:00:00")
+        preferences.put(EquilStringKey.SerialNumber, "A00001")
+        preferences.put(EquilStringKey.Password, "FEDCBA9876543210FEDCBA9876543210FEDCBA9876543210FEDCBA9876543210")
 
         equilState = loaded
+        storePodState()
         syncOverviewFlows()
     }
 
