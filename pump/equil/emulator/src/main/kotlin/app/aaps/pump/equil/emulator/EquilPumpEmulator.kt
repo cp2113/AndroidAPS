@@ -32,6 +32,8 @@ import java.security.MessageDigest
  * - History get (0x02,0x01)
  * - Alarm set (0x01,0x0b)
  * - Setting set (0x01,0x05)
+ * - Insulin change set (0x01,0x06 — CmdInsulinChange)
+ * - Step set (0x01,0x07 — CmdStepSet)
  * - Time set (0x01,0x00 — shares type with model set, distinguished by port)
  * - Pair (0x0D,0x0D port — special key exchange)
  */
@@ -279,6 +281,8 @@ class EquilPumpEmulator(val state: EquilPumpState = EquilPumpState(), private va
             cmdType1 == 0x01 && cmdType2 == 0x00 -> processModelOrTimeSet(data)
             cmdType1 == 0x01 && cmdType2 == 0x0b -> processAlarmSet(data)
             cmdType1 == 0x01 && cmdType2 == 0x05 -> processSettingSet(data)
+            cmdType1 == 0x01 && cmdType2 == 0x06 -> processInsulinChange(data)
+            cmdType1 == 0x01 && cmdType2 == 0x07 -> processStepSet(data)
 
             else                                 -> indexedResponse()
         }
@@ -487,6 +491,26 @@ class EquilPumpEmulator(val state: EquilPumpState = EquilPumpState(), private va
             state.basalThresholdStep = (data[basalOffset].toInt() and 0xFF) or ((data[basalOffset + 1].toInt() and 0xFF) shl 8)
             state.bolusThresholdStep = (data[bolusOffset].toInt() and 0xFF) or ((data[bolusOffset + 1].toInt() and 0xFF) shl 8)
         }
+        return indexedResponse()
+    }
+
+    private fun processInsulinChange(data: ByteArray): ByteArray {
+        aapsLogger?.debug(LTag.PUMPEMULATOR, "Emulator: processInsulinChange")
+        state.startInsulinChange()
+        return indexedResponse()
+    }
+
+    private fun processStepSet(data: ByteArray): ByteArray {
+        val steps = if (data.size >= 10) {
+            getInt(data, 6)
+        } else if (data.size >= 8) {
+            (data[6].toInt() and 0xFF) or ((data[7].toInt() and 0xFF) shl 8)
+        } else {
+            5
+        }
+        val effectiveSteps = if (steps > 0) steps else 5
+        aapsLogger?.debug(LTag.PUMPEMULATOR, "Emulator: processStepSet steps=$effectiveSteps")
+        state.addReservoirSteps(effectiveSteps)
         return indexedResponse()
     }
 
