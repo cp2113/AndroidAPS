@@ -37,7 +37,7 @@ class EquilComposeContent(
      * The emulated pump has no radio behind it, so the real BLE readiness check would fail the wizard
      * before it starts. Mirrors `DanaRSPairWizardViewModel.isEmulating`.
      */
-    private val isEmulating: Boolean get() = config.isEnabled(ExternalOptions.EMULATE_EQUIL)
+    private val isEmulating: Boolean get() = true
 
     @Composable
     override fun Render(
