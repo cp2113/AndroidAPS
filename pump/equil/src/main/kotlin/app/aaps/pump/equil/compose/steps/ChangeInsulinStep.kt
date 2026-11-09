@@ -46,12 +46,12 @@ internal fun ChangeInsulinStep(
         isLoading = isLoading,
         errorMessage = errorMessage,
         newInfusionSet = newInfusionSet,
-        bleedCode = bleedCode,
         imageRes = R.drawable.equil_animation_wizard_detach,
         onNewInfusionSet = { viewModel.selectNewInfusionSet(it) },
-        onBleedCodeChange = { viewModel.setBleedCode(it) },
         onNext = { viewModel.startChangeInsulin() },
-        onCancel = onCancel
+        onCancel = onCancel,
+        bleedCode = bleedCode,
+        onBleedCodeChange = { viewModel.setBleedCode(it) }
     )
 }
 
@@ -70,12 +70,12 @@ internal fun ChangeInsulinStepContent(
     isLoading: Boolean,
     errorMessage: String?,
     newInfusionSet: Boolean?,
-    bleedCode: String,
     @DrawableRes imageRes: Int,
     onNewInfusionSet: (Boolean) -> Unit,
-    onBleedCodeChange: (String) -> Unit,
     onNext: () -> Unit,
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
+    bleedCode: String = "",
+    onBleedCodeChange: (String) -> Unit = {}
 ) {
     WizardStepLayout(
         primaryButton = WizardButton(
