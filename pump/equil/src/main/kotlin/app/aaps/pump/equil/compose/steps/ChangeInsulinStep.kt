@@ -9,15 +9,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.aaps.core.ui.compose.AapsSpacing
 import app.aaps.core.ui.compose.banner.ErrorBanner
@@ -37,6 +40,7 @@ internal fun ChangeInsulinStep(
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
     val newInfusionSet by viewModel.newInfusionSet.collectAsStateWithLifecycle()
+    val bleedCode by viewModel.bleedCode.collectAsStateWithLifecycle()
 
     ChangeInsulinStepContent(
         isLoading = isLoading,
@@ -45,7 +49,9 @@ internal fun ChangeInsulinStep(
         imageRes = R.drawable.equil_animation_wizard_detach,
         onNewInfusionSet = { viewModel.selectNewInfusionSet(it) },
         onNext = { viewModel.startChangeInsulin() },
-        onCancel = onCancel
+        onCancel = onCancel,
+        bleedCode = bleedCode,
+        onBleedCodeChange = { viewModel.setBleedCode(it) }
     )
 }
 
@@ -67,7 +73,9 @@ internal fun ChangeInsulinStepContent(
     @DrawableRes imageRes: Int,
     onNewInfusionSet: (Boolean) -> Unit,
     onNext: () -> Unit,
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
+    bleedCode: String = "",
+    onBleedCodeChange: (String) -> Unit = {}
 ) {
     WizardStepLayout(
         primaryButton = WizardButton(
@@ -112,6 +120,38 @@ internal fun ChangeInsulinStepContent(
                 onClick = { onNewInfusionSet(false) }
             )
         }
+
+        // --- CSAK LÉGTELENÍTÉS (BLEED-ONLY) BIZTONSÁGI MEZŐ ---
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = AapsSpacing.small),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "If you only want to bleed the system, enter “air”!",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color(0xFFFFAA00),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = AapsSpacing.small)
+            )
+            OutlinedTextField(
+                value = bleedCode,
+                onValueChange = onBleedCodeChange,
+                modifier = Modifier.fillMaxWidth(0.7f),
+                placeholder = {
+                    Text(
+                        text = "enter 'air'",
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                },
+                textStyle = MaterialTheme.typography.bodyLarge.copy(textAlign = TextAlign.Center),
+                singleLine = true,
+                enabled = !isLoading
+            )
+        }
+
         if (newInfusionSet == false) {
             Text(
                 text = stringResource(R.string.equil_same_infusion_set_hint),
