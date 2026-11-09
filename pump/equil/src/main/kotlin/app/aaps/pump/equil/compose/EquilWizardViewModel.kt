@@ -149,6 +149,16 @@ class EquilWizardViewModel(
     private val _newInfusionSet = MutableStateFlow<Boolean?>(null)
     val newInfusionSet: StateFlow<Boolean?> = _newInfusionSet.asStateFlow()
 
+    // Bleed-only ("air") mode state
+    private val _bleedCode = MutableStateFlow("")
+    val bleedCode: StateFlow<String> = _bleedCode.asStateFlow()
+
+    private var isBleedOnlyActive = false
+
+    fun setBleedCode(code: String) {
+        _bleedCode.value = code
+    }
+
     // Unpair result (shown as OkDialog after unpair completes)
     private val _unpairResultMessage = MutableStateFlow<String?>(null)
     val unpairResultMessage: StateFlow<String?> = _unpairResultMessage.asStateFlow()
@@ -249,6 +259,8 @@ class EquilWizardViewModel(
         _scanning.value = false
         _scanError.value = null
         _airRemovalDone.value = false
+        _bleedCode.value = ""
+        isBleedOnlyActive = false
         _unpairResultMessage.value = null
         _serialNumberDisplay.value = equilManager.equilState?.serialNumber ?: ""
         fillStepCount = 0
@@ -325,6 +337,10 @@ class EquilWizardViewModel(
 
     /** Move to the step before [currentStep] in the workflow. */
     fun moveToPreviousStep(currentStep: EquilWizardStep) {
+        if (isBleedOnlyActive && currentStep == EquilWizardStep.AIR) {
+            moveStep(EquilWizardStep.CHANGE_INSULIN)
+            return
+        }
         val index = workflowSteps.indexOf(currentStep)
         if (index > 0) {
             moveStep(workflowSteps[index - 1])
@@ -370,7 +386,7 @@ class EquilWizardViewModel(
             EquilWizardStep.ASSEMBLE,
             EquilWizardStep.CHANGE_INSULIN,
             EquilWizardStep.UNPAIR_DETACH
-        )
+        ) || (isBleedOnlyActive && step == EquilWizardStep.AIR)
     }
 
     /** Maps a StateFlow to a derived StateFlow. Call only at property init time — not inside composables. */
@@ -815,18 +831,20 @@ class EquilWizardViewModel(
         }
         val time = activationTimestamp
         // A cannula change only with a new infusion set; a reservoir or battery change alone keeps
-        // the cannula age (#5199). Not answered counts as a new set, the behaviour before the question.
-        for (type in _workflow.value.therapyEvents(newInfusionSet = _newInfusionSet.value != false)) {
-            pumpSync.insertTherapyEventIfNewWithTimestamp(
-                timestamp = time,
-                type = type,
-                pumpType = PumpType.EQUIL,
-                pumpSerial = equilPumpPlugin.serialNumber()
-            )
+        // the cannula age (#5199). Bleed-only does not reset either age.
+        if (!isBleedOnlyActive) {
+            for (type in _workflow.value.therapyEvents(newInfusionSet = _newInfusionSet.value != false)) {
+                pumpSync.insertTherapyEventIfNewWithTimestamp(
+                    timestamp = time,
+                    type = type,
+                    pumpType = PumpType.EQUIL,
+                    pumpSerial = equilPumpPlugin.serialNumber()
+                )
+            }
         }
         val location = _siteLocation.value.takeIf { it != TE.Location.NONE }
         val arrow = _siteArrow.value.takeIf { it != TE.Arrow.NONE }
-        if (location != null || arrow != null) {
+        if (!isBleedOnlyActive && (location != null || arrow != null)) {
             viewModelScope.launch {
                 try {
                     val entries = persistenceLayer.getTherapyEventDataFromToTime(time, time)
@@ -840,7 +858,7 @@ class EquilWizardViewModel(
             }
         }
         // The pump history entry says "insert cannula", so only write it when a cannula was inserted.
-        if (_newInfusionSet.value != false) {
+        if (!isBleedOnlyActive && _newInfusionSet.value != false) {
             val record = EquilHistoryRecord(
                 id = time,
                 type = EquilHistoryRecord.EventType.INSERT_CANNULA,
@@ -925,6 +943,24 @@ class EquilWizardViewModel(
     // region Change Insulin step
 
     fun startChangeInsulin() {
+        val isBleedRequested = _bleedCode.value.trim().equals("air", ignoreCase = true)
+        if (isBleedRequested && _newInfusionSet.value == true) {
+            // --- CSAK LÉGTELENÍTÉS (BLEED-ONLY) MÓD ---
+            isBleedOnlyActive = true
+            _bleedCode.value = ""
+
+            // 1. Motor NEM teker vissza (CmdInsulinChange kihagyva)
+            // 2. Tartály- és akkuadatok NEM nullázódnak (resetData és setBattery(null) kihagyva)
+            equilManager.setRunMode(RunMode.STOP)
+            equilManager.setActivationProgress(ActivationProgress.CANNULA_CHANGE)
+
+            // 3. Közvetlen ugrás a Prime cannula (Air / légtelenítés) képernyőre:
+            moveStep(EquilWizardStep.AIR)
+            return
+        }
+
+        // --- NORMÁL PATRONCSERE MÓD ---
+        isBleedOnlyActive = false
         _isLoading.value = true
         _errorMessage.value = null
         viewModelScope.launch {
